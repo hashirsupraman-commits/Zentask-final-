@@ -9,29 +9,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Code ko cloud machine par lana
       - uses: actions/checkout@v4
 
+      # Step 2: Java setup karna
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # Step 3: Flutter setup karna
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
+      # Step 4: Direct packages install karna (bina kisi folder mein jaye)
       - name: Install dependencies
-        run: |
-          cd Zentask-final-
-          flutter pub get
+        run: flutter pub get
 
+      # Step 5: Direct release APK build karna
       - name: Build APK
-        run: |
-          cd Zentask-final-
-          flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons
 
+      # Step 6: Bani hui APK ko upload karna
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ZenTask-APK
-          path: Zentask-final-/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
