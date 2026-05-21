@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Code ko cloud machine par lana
+      # Step 1: Code ko cloud machine par dakhil karna
       - uses: actions/checkout@v4
 
       # Step 2: Java setup karna
@@ -23,17 +23,38 @@ jobs:
         with:
           channel: 'stable'
 
-      # Step 4: Direct packages install karna (bina kisi folder mein jaye)
+      # Step 4: Sahi directory automatic dhoond kar packages install karna
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter pub get
+          elif [ -d "Zentask-final-" ] && [ -f "Zentask-final-/pubspec.yaml" ]; then
+            cd Zentask-final- && flutter pub get
+          elif [ -d "zentask" ] && [ -f "zentask/pubspec.yaml" ]; then
+            cd zentask && flutter pub get
+          else
+            echo "Searching for pubspec.yaml..."
+            DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+            cd "$DIR" && flutter pub get
+          fi
 
-      # Step 5: Direct release APK build karna
+      # Step 5: Release APK build karna (Sahi directory dhoond kar)
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter build apk --release --no-tree-shake-icons
+          elif [ -d "Zentask-final-" ] && [ -f "Zentask-final-/pubspec.yaml" ]; then
+            cd Zentask-final- && flutter build apk --release --no-tree-shake-icons
+          elif [ -d "zentask" ] && [ -f "zentask/pubspec.yaml" ]; then
+            cd zentask && flutter build apk --release --no-tree-shake-icons
+          else
+            DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+            cd "$DIR" && flutter build apk --release --no-tree-shake-icons
+          fi
 
-      # Step 6: Bani hui APK ko upload karna
+      # Step 6: Bani hui APK ko upload karna (Pure workspace se search karke)
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ZenTask-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: "**/build/app/outputs/flutter-apk/app-release.apk"
